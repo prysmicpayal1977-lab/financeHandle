@@ -2379,22 +2379,22 @@ const API_URL =
 
 
 let sessionToken = null;
-
 let currentPartner = null;
 
 let partners = [];
-
+let transactions = [];
 let settlements = [];
 
 let currentSettlement = null;
 
-let transactions = [];
-
 let transactionModal;
-
 let cancelModal;
-
 let changePasswordModal;
+
+let settlementModal;
+let cancelSettlementModal;
+let transactionViewModal;
+let settlementViewModal;
 
 let appToast;
 
@@ -2876,6 +2876,10 @@ async function loadDashboard() {
 
 async function loadSettlements() {
 
+    console.log(
+        "Loading settlements..."
+    );
+
     const result =
         await apiRequest(
             "settlements",
@@ -2885,6 +2889,10 @@ async function loadSettlements() {
             }
         );
 
+    console.log(
+        "SETTLEMENT API RESPONSE:",
+        result
+    );
 
     handleSessionResponse(
         result
@@ -2901,7 +2909,15 @@ async function loadSettlements() {
 
 
     settlements =
-        result.settlements || [];
+        Array.isArray(result.settlements)
+            ? result.settlements
+            : [];
+
+
+    console.log(
+        "SETTLEMENT RECORDS:",
+        settlements
+    );
 
 
     renderSettlements();
