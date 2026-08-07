@@ -859,18 +859,30 @@
 
                     <div class="content-card-header">
 
-                        <h5 class="mb-0 fw-bold">
-                            Partner Settlement
-                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <h5 class="mb-0 fw-bold">
+                                Partner Settlement
+                            </h5>
+
+                            <span
+                                id="settlementStatusBadge"
+                                class="badge text-bg-light">
+
+                                Settled
+
+                            </span>
+
+                        </div>
 
                     </div>
 
+
                     <div class="content-card-body">
 
-                        <div class="settlement-box">
+                        <div class="settlement-box mb-3">
 
-                            <div
-                                class="small text-muted mb-2">
+                            <div class="small text-muted mb-2">
                                 Current Position
                             </div>
 
@@ -885,11 +897,130 @@
                         </div>
 
 
+                        <div class="row g-2 mb-3">
+
+                            <div class="col-4">
+
+                                <div class="partner-stat-box text-center h-100">
+
+                                    <div class="small text-muted">
+                                        Original Due
+                                    </div>
+
+                                    <div
+                                        id="originalSettlementAmount"
+                                        class="fw-bold mt-1">
+
+                                        ₹0.00
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-4">
+
+                                <div class="partner-stat-box text-center h-100">
+
+                                    <div class="small text-muted">
+                                        Settled
+                                    </div>
+
+                                    <div
+                                        id="totalSettledAmount"
+                                        class="fw-bold text-success mt-1">
+
+                                        ₹0.00
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-4">
+
+                                <div class="partner-stat-box text-center h-100">
+
+                                    <div class="small text-muted">
+                                        Outstanding
+                                    </div>
+
+                                    <div
+                                        id="outstandingSettlementAmount"
+                                        class="fw-bold text-danger mt-1">
+
+                                        ₹0.00
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="settlementDirectionBox"
+                            class="border rounded-3 p-3 mb-3 hidden">
+
+                            <div class="row text-center align-items-center">
+
+                                <div class="col">
+
+                                    <div class="small text-muted">
+                                        From
+                                    </div>
+
+                                    <strong id="settlementFromName">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                                <div class="col-auto">
+
+                                    <i class="bi bi-arrow-right fs-4 text-primary"></i>
+
+                                </div>
+
+                                <div class="col">
+
+                                    <div class="small text-muted">
+                                        To
+                                    </div>
+
+                                    <strong id="settlementToName">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            id="settleAmountButton"
+                            class="btn btn-primary w-100 hidden"
+                            onclick="openSettlementModal()">
+
+                            <i class="bi bi-cash-coin me-1"></i>
+                            Settle Amount
+
+                        </button>
+
+
                         <div class="small text-muted mt-3">
 
-                            Settlement considers both expenses
-                            personally paid by partners and
-                            company income received by partners.
+                            Settlement payments are transfers between
+                            partners and do not affect company income
+                            or expenses.
 
                         </div>
 
@@ -919,6 +1050,80 @@
                     </div>
 
                 </div>
+
+            </div>
+
+        </div>
+
+        <!-- SETTLEMENT HISTORY -->
+
+        <div class="content-card mb-4">
+
+            <div class="content-card-header">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <h5 class="mb-1 fw-bold">
+                            Settlement History
+                        </h5>
+
+                        <small class="text-muted">
+                            Partner-to-partner settlement payments
+                        </small>
+
+                    </div>
+
+                    <span
+                        id="settlementCount"
+                        class="badge text-bg-light">
+
+                        0 Records
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover">
+
+                    <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Amount</th>
+                        <th>Mode</th>
+                        <th>Reference</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="settlementTableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            class="text-center py-5 text-muted">
+
+                            No settlements recorded.
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
 
             </div>
 
@@ -1548,6 +1753,574 @@
 
 </div>
 
+<!-- =========================================================
+     SETTLEMENT MODAL
+========================================================= -->
+
+<div
+    class="modal fade"
+    id="settlementModal"
+    tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    Settle Partner Due
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <form id="settlementForm">
+
+                <div class="modal-body">
+
+                    <div class="alert alert-primary">
+
+                        <div class="row text-center align-items-center">
+
+                            <div class="col">
+
+                                <small>From</small>
+
+                                <div
+                                    id="modalSettlementFrom"
+                                    class="fw-bold">
+                                    -
+                                </div>
+
+                            </div>
+
+                            <div class="col-auto">
+
+                                <i class="bi bi-arrow-right"></i>
+
+                            </div>
+
+                            <div class="col">
+
+                                <small>To</small>
+
+                                <div
+                                    id="modalSettlementTo"
+                                    class="fw-bold">
+                                    -
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Current Outstanding
+                        </label>
+
+                        <div
+                            id="modalOutstandingAmount"
+                            class="form-control bg-light fw-bold">
+
+                            ₹0.00
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Settlement Amount *
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                ₹
+                            </span>
+
+                            <input
+                                id="settlementInputAmount"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Settlement Date *
+                        </label>
+
+                        <input
+                            id="settlementDate"
+                            type="date"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Payment Mode
+                        </label>
+
+                        <select
+                            id="settlementPaymentMode"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            <option value="UPI">
+                                UPI
+                            </option>
+
+                            <option value="BANK TRANSFER">
+                                Bank Transfer
+                            </option>
+
+                            <option value="CASH">
+                                Cash
+                            </option>
+
+                            <option value="CHEQUE">
+                                Cheque
+                            </option>
+
+                            <option value="OTHER">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Reference / UTR Number
+                        </label>
+
+                        <input
+                            id="settlementReference"
+                            class="form-control"
+                            placeholder="Optional reference number">
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="form-label">
+                            Notes
+                        </label>
+
+                        <textarea
+                            id="settlementNotes"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Optional notes"></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        <i class="bi bi-check-circle me-1"></i>
+                        Confirm Settlement
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    class="modal fade"
+    id="cancelSettlementModal"
+    tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    Cancel Settlement
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <input
+                    type="hidden"
+                    id="cancelSettlementId">
+
+
+                <div class="alert alert-warning">
+
+                    Cancelling this settlement will add its
+                    amount back to the outstanding partner due.
+
+                </div>
+
+
+                <label class="form-label">
+                    Cancellation Reason *
+                </label>
+
+                <textarea
+                    id="settlementCancellationReason"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Enter cancellation reason"></textarea>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-light"
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+                <button
+                    class="btn btn-danger"
+                    onclick="confirmCancelSettlement()">
+
+                    Cancel Settlement
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     TRANSACTION VIEW MODAL
+========================================================= -->
+
+<div
+    class="modal fade"
+    id="transactionViewModal"
+    tabindex="-1">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5 class="modal-title fw-bold">
+                        Transaction Details
+                    </h5>
+
+                    <small
+                        id="viewTransactionId"
+                        class="text-muted">
+                    </small>
+
+                </div>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-4">
+
+                        <div class="partner-stat-box">
+
+                            <small class="text-muted">
+                                Amount
+                            </small>
+
+                            <div
+                                id="viewAmount"
+                                class="fs-4 fw-bold">
+                                -
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="partner-stat-box">
+
+                            <small class="text-muted">
+                                Type
+                            </small>
+
+                            <div
+                                id="viewType"
+                                class="fw-bold mt-1">
+                                -
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="partner-stat-box">
+
+                            <small class="text-muted">
+                                Status
+                            </small>
+
+                            <div
+                                id="viewStatus"
+                                class="fw-bold mt-1">
+                                -
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="small text-muted">
+                            Transaction Date
+                        </label>
+
+                        <div
+                            id="viewDate"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="small text-muted">
+                            Party
+                        </label>
+
+                        <div
+                            id="viewParty"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="small text-muted">
+                            Reason / Description
+                        </label>
+
+                        <div
+                            id="viewReason"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label
+                            id="viewPaidReceivedLabel"
+                            class="small text-muted">
+
+                            Paid / Received By
+
+                        </label>
+
+                        <div
+                            id="viewPaidReceivedBy"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="small text-muted">
+                            Payment Mode
+                        </label>
+
+                        <div
+                            id="viewPaymentMode"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="small text-muted">
+                            Reference Number
+                        </label>
+
+                        <div
+                            id="viewReference"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="small text-muted">
+                            Per Partner Share
+                        </label>
+
+                        <div
+                            id="viewPartnerShare"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="small text-muted">
+                            Notes
+                        </label>
+
+                        <div
+                            id="viewNotes"
+                            class="fw-semibold">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="viewCancelledInfo"
+                        class="col-12 hidden">
+
+                        <div class="alert alert-danger mb-0">
+
+                            <strong>
+                                This transaction is cancelled.
+                            </strong>
+
+                            <div
+                                id="viewCancellationReason"
+                                class="mt-1">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 <!-- =========================================================
      TOAST
@@ -1611,6 +2384,10 @@ let currentPartner = null;
 
 let partners = [];
 
+let settlements = [];
+
+let currentSettlement = null;
+
 let transactions = [];
 
 let transactionModal;
@@ -1655,6 +2432,26 @@ document.addEventListener(
             new bootstrap.Toast(
                 document.getElementById(
                     "appToast"
+                )
+            );
+        settlementModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    "settlementModal"
+                )
+            );
+
+        cancelSettlementModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    "cancelSettlementModal"
+                )
+            );
+
+        transactionViewModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    "transactionViewModal"
                 )
             );
 
@@ -1901,7 +2698,8 @@ async function startApplication() {
 
         await Promise.all([
             loadDashboard(),
-            loadTransactions()
+            loadTransactions(),
+            loadSettlements()
         ]);
 
 
@@ -2076,6 +2874,39 @@ async function loadDashboard() {
     );
 }
 
+async function loadSettlements() {
+
+    const result =
+        await apiRequest(
+            "settlements",
+            {
+                sessionToken:
+                    sessionToken
+            }
+        );
+
+
+    handleSessionResponse(
+        result
+    );
+
+
+    if (!result.success) {
+
+        throw new Error(
+            result.message ||
+            "Unable to load settlements."
+        );
+    }
+
+
+    settlements =
+        result.settlements || [];
+
+
+    renderSettlements();
+}
+
 
 /* ============================================================
    RENDER DASHBOARD
@@ -2149,6 +2980,128 @@ function renderDashboard(data) {
 
     const settlement =
         data.settlement || {};
+    
+    currentSettlement = settlement;
+
+
+    const originalAmount =
+        Number(
+            settlement.originalAmount || 0
+        );
+
+
+    const settledAmount =
+        Number(
+            settlement.settledAmount || 0
+        );
+
+
+    const outstandingAmount =
+        Number(
+            settlement.outstandingAmount ??
+            settlement.amount ??
+            0
+        );
+
+
+    document
+        .getElementById(
+            "originalSettlementAmount"
+        )
+        .textContent =
+        money(originalAmount);
+
+
+    document
+        .getElementById(
+            "totalSettledAmount"
+        )
+        .textContent =
+        money(settledAmount);
+
+
+    document
+        .getElementById(
+            "outstandingSettlementAmount"
+        )
+        .textContent =
+        money(outstandingAmount);
+
+
+    const directionBox =
+        document.getElementById(
+            "settlementDirectionBox"
+        );
+
+
+    const settleButton =
+        document.getElementById(
+            "settleAmountButton"
+        );
+
+
+    const statusBadge =
+        document.getElementById(
+            "settlementStatusBadge"
+        );
+
+
+    if (
+        outstandingAmount > 0
+    ) {
+
+        directionBox
+            .classList
+            .remove("hidden");
+
+
+        settleButton
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById(
+                "settlementFromName"
+            )
+            .textContent =
+            settlement.fromPartnerName || "-";
+
+
+        document
+            .getElementById(
+                "settlementToName"
+            )
+            .textContent =
+            settlement.toPartnerName || "-";
+
+
+        statusBadge.textContent =
+            "Pending";
+
+
+        statusBadge.className =
+            "badge text-bg-warning";
+
+    } else {
+
+        directionBox
+            .classList
+            .add("hidden");
+
+
+        settleButton
+            .classList
+            .add("hidden");
+
+
+        statusBadge.textContent =
+            "Settled";
+
+
+        statusBadge.className =
+            "badge text-bg-success";
+    }
 
 
     document
@@ -2173,6 +3126,518 @@ function renderDashboard(data) {
     renderPartnerStats(
         data.partners || []
     );
+}
+
+function openSettlementModal() {
+
+    if (
+        !currentSettlement ||
+        Number(
+            currentSettlement.outstandingAmount || 0
+        ) <= 0
+    ) {
+
+        showToast(
+            "Settlement",
+            "There is currently no outstanding settlement."
+        );
+
+        return;
+    }
+
+
+    document
+        .getElementById(
+            "settlementForm"
+        )
+        .reset();
+
+
+    document
+        .getElementById(
+            "modalSettlementFrom"
+        )
+        .textContent =
+        currentSettlement.fromPartnerName;
+
+
+    document
+        .getElementById(
+            "modalSettlementTo"
+        )
+        .textContent =
+        currentSettlement.toPartnerName;
+
+
+    document
+        .getElementById(
+            "modalOutstandingAmount"
+        )
+        .textContent =
+        money(
+            currentSettlement.outstandingAmount
+        );
+
+
+    const amountInput =
+        document.getElementById(
+            "settlementInputAmount"
+        );
+
+
+    amountInput.max =
+        currentSettlement.outstandingAmount;
+
+
+    /*
+     * Default to full outstanding amount.
+     * User can reduce it for partial settlement.
+     */
+    amountInput.value =
+        currentSettlement.outstandingAmount;
+
+
+    const today =
+        new Date();
+
+
+    document
+        .getElementById(
+            "settlementDate"
+        )
+        .value =
+        new Date(
+            today.getTime() -
+            today.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .split("T")[0];
+
+
+    settlementModal.show();
+}
+
+document
+    .getElementById(
+        "settlementForm"
+    )
+    .addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const amount =
+                Number(
+                    document
+                        .getElementById(
+                            "settlementInputAmount"
+                        )
+                        .value
+                );
+
+
+            const outstanding =
+                Number(
+                    currentSettlement
+                        .outstandingAmount || 0
+                );
+
+
+            if (
+                amount <= 0
+            ) {
+
+                showToast(
+                    "Settlement",
+                    "Settlement amount must be greater than zero."
+                );
+
+                return;
+            }
+
+
+            if (
+                amount > outstanding
+            ) {
+
+                showToast(
+                    "Settlement",
+                    "Settlement amount cannot exceed " +
+                    money(outstanding) +
+                    "."
+                );
+
+                return;
+            }
+
+
+            const settlement = {
+
+                amount:
+                    amount,
+
+                settlementDate:
+                    document
+                        .getElementById(
+                            "settlementDate"
+                        )
+                        .value,
+
+                paymentMode:
+                    document
+                        .getElementById(
+                            "settlementPaymentMode"
+                        )
+                        .value,
+
+                referenceNumber:
+                    document
+                        .getElementById(
+                            "settlementReference"
+                        )
+                        .value
+                        .trim(),
+
+                notes:
+                    document
+                        .getElementById(
+                            "settlementNotes"
+                        )
+                        .value
+                        .trim()
+            };
+
+
+            showLoader(
+                "Recording settlement..."
+            );
+
+
+            try {
+
+                const result =
+                    await apiRequest(
+                        "addsettlement",
+                        {
+                            sessionToken:
+                                sessionToken,
+
+                            settlement:
+                                settlement
+                        }
+                    );
+
+
+                handleSessionResponse(
+                    result
+                );
+
+
+                if (!result.success) {
+
+                    showToast(
+                        "Settlement",
+                        result.message
+                    );
+
+                    return;
+                }
+
+
+                settlementModal.hide();
+
+
+                showToast(
+                    "Success",
+                    result.message
+                );
+
+
+                await Promise.all([
+                    loadDashboard(),
+                    loadSettlements()
+                ]);
+
+
+            } catch (error) {
+
+                showToast(
+                    "Error",
+                    error.message
+                );
+
+            } finally {
+
+                hideLoader();
+            }
+        }
+    );
+
+function renderSettlements() {
+
+    const tbody =
+        document.getElementById(
+            "settlementTableBody"
+        );
+
+
+    document
+        .getElementById(
+            "settlementCount"
+        )
+        .textContent =
+        settlements.length +
+        (
+            settlements.length === 1
+                ? " Record"
+                : " Records"
+        );
+
+
+    if (!settlements.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="text-center py-5 text-muted">
+
+                    No settlements recorded.
+
+                </td>
+
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    tbody.innerHTML =
+        settlements
+            .map(function(item) {
+
+                const cancelled =
+                    String(
+                        item.status || "ACTIVE"
+                    )
+                        .toUpperCase() ===
+                    "CANCELLED";
+
+
+                return `
+
+                    <tr class="${
+                        cancelled
+                            ? "transaction-cancelled"
+                            : ""
+                    }">
+
+                        <td>
+                            ${formatDisplayDate(
+                                item.settlementDate
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.fromPartnerName
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.toPartnerName
+                            )}
+                        </td>
+
+                        <td class="fw-bold">
+                            ${money(item.amount)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.paymentMode || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.referenceNumber || "-"
+                            )}
+                        </td>
+
+                        <td>
+
+                            <span class="badge ${
+                                cancelled
+                                    ? "badge-cancelled"
+                                    : "badge-active"
+                            }">
+
+                                ${
+                                    cancelled
+                                        ? "CANCELLED"
+                                        : "ACTIVE"
+                                }
+
+                            </span>
+
+                        </td>
+
+                        <td class="text-end">
+
+                            ${
+                                !cancelled
+                                    ? `
+
+                                    <button
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="openCancelSettlementModal(
+                                            '${escapeJs(
+                                                item.settlementId
+                                            )}'
+                                        )">
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                    </button>
+
+                                    `
+                                    : "-"
+                            }
+
+                        </td>
+
+                    </tr>
+                `;
+
+            })
+            .join("");
+}
+
+function openCancelSettlementModal(
+    settlementId
+) {
+
+    document
+        .getElementById(
+            "cancelSettlementId"
+        )
+        .value =
+        settlementId;
+
+
+    document
+        .getElementById(
+            "settlementCancellationReason"
+        )
+        .value = "";
+
+
+    cancelSettlementModal.show();
+}
+
+
+async function confirmCancelSettlement() {
+
+    const settlementId =
+        document
+            .getElementById(
+                "cancelSettlementId"
+            )
+            .value;
+
+
+    const reason =
+        document
+            .getElementById(
+                "settlementCancellationReason"
+            )
+            .value
+            .trim();
+
+
+    if (!reason) {
+
+        showToast(
+            "Required",
+            "Please enter a cancellation reason."
+        );
+
+        return;
+    }
+
+
+    showLoader(
+        "Cancelling settlement..."
+    );
+
+
+    try {
+
+        const result =
+            await apiRequest(
+                "cancelsettlement",
+                {
+                    sessionToken:
+                        sessionToken,
+
+                    settlementId:
+                        settlementId,
+
+                    cancellationReason:
+                        reason
+                }
+            );
+
+
+        handleSessionResponse(
+            result
+        );
+
+
+        if (!result.success) {
+
+            showToast(
+                "Error",
+                result.message
+            );
+
+            return;
+        }
+
+
+        cancelSettlementModal.hide();
+
+
+        showToast(
+            "Success",
+            result.message
+        );
+
+
+        await Promise.all([
+            loadDashboard(),
+            loadSettlements()
+        ]);
+
+
+    } catch (error) {
+
+        showToast(
+            "Error",
+            error.message
+        );
+
+    } finally {
+
+        hideLoader();
+    }
 }
 
 
@@ -2662,15 +4127,38 @@ function renderTransactions() {
 
                             <td class="text-end">
 
+                                <!-- VIEW -->
+                                <button
+                                    class="btn
+                                        btn-sm
+                                        btn-outline-secondary
+                                        me-1"
+
+                                    title="View"
+
+                                    onclick="viewTransaction(
+                                        '${escapeJs(
+                                            transaction.transactionId
+                                        )}'
+                                    )">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </button>
+
+
                                 ${
                                     !isCancelled
                                     ? `
 
+                                    <!-- EDIT -->
                                     <button
                                         class="btn
-                                               btn-sm
-                                               btn-outline-primary
-                                               me-1"
+                                            btn-sm
+                                            btn-outline-primary
+                                            me-1"
+
+                                        title="Edit"
 
                                         onclick="editTransaction(
                                             '${escapeJs(
@@ -2683,10 +4171,13 @@ function renderTransactions() {
                                     </button>
 
 
+                                    <!-- CANCEL -->
                                     <button
                                         class="btn
-                                               btn-sm
-                                               btn-outline-danger"
+                                            btn-sm
+                                            btn-outline-danger"
+
+                                        title="Cancel"
 
                                         onclick="openCancelModal(
                                             '${escapeJs(
@@ -2699,7 +4190,7 @@ function renderTransactions() {
                                     </button>
 
                                     `
-                                    : "-"
+                                    : ""
                                 }
 
                             </td>
@@ -3497,6 +4988,10 @@ function clearSession() {
     partners = [];
 
     transactions = [];
+
+    settlements = [];
+
+    currentSettlement = null;
 }
 
 
@@ -3762,6 +5257,224 @@ function showToast(
 
 
     appToast.show();
+}
+
+function viewTransaction(
+    transactionId
+) {
+
+    const transaction =
+        transactions.find(
+            function(item) {
+
+                return (
+                    item.transactionId ===
+                    transactionId
+                );
+            }
+        );
+
+
+    if (!transaction) {
+
+        showToast(
+            "Error",
+            "Transaction not found."
+        );
+
+        return;
+    }
+
+
+    const isIncome =
+        String(
+            transaction.transactionType
+        ).toUpperCase() ===
+        "INCOME";
+
+
+    const cancelled =
+        String(
+            transaction.transactionStatus ||
+            "ACTIVE"
+        ).toUpperCase() ===
+        "CANCELLED";
+
+
+    document
+        .getElementById(
+            "viewTransactionId"
+        )
+        .textContent =
+        transaction.transactionId || "";
+
+
+    document
+        .getElementById(
+            "viewAmount"
+        )
+        .textContent =
+        money(
+            transaction.amount
+        );
+
+
+    const amountElement =
+        document.getElementById(
+            "viewAmount"
+        );
+
+
+    amountElement.className =
+        "fs-4 fw-bold " +
+        (
+            isIncome
+                ? "text-success"
+                : "text-danger"
+        );
+
+
+    document
+        .getElementById(
+            "viewType"
+        )
+        .textContent =
+        transaction.transactionType || "-";
+
+
+    document
+        .getElementById(
+            "viewStatus"
+        )
+        .textContent =
+        cancelled
+            ? "CANCELLED"
+            : "ACTIVE";
+
+
+    document
+        .getElementById(
+            "viewDate"
+        )
+        .textContent =
+        formatDisplayDate(
+            transaction.transactionDate
+        );
+
+
+    document
+        .getElementById(
+            "viewParty"
+        )
+        .textContent =
+        transaction.partyName || "-";
+
+
+    document
+        .getElementById(
+            "viewReason"
+        )
+        .textContent =
+        transaction.reason || "-";
+
+
+    document
+        .getElementById(
+            "viewPaidReceivedLabel"
+        )
+        .textContent =
+        isIncome
+            ? "Received By"
+            : "Paid By";
+
+
+    document
+        .getElementById(
+            "viewPaidReceivedBy"
+        )
+        .textContent =
+        transaction.paidReceivedByName ||
+        transaction.paidReceivedBy ||
+        "-";
+
+
+    document
+        .getElementById(
+            "viewPaymentMode"
+        )
+        .textContent =
+        transaction.paymentMode || "-";
+
+
+    document
+        .getElementById(
+            "viewReference"
+        )
+        .textContent =
+        transaction.referenceNumber || "-";
+
+
+    document
+        .getElementById(
+            "viewNotes"
+        )
+        .textContent =
+        transaction.notes || "-";
+
+
+    /*
+     * For your current 50/50 partnership.
+     */
+    document
+        .getElementById(
+            "viewPartnerShare"
+        )
+        .textContent =
+        money(
+            Number(
+                transaction.amount || 0
+            ) / 2
+        ) +
+        " each";
+
+
+    const cancelledInfo =
+        document.getElementById(
+            "viewCancelledInfo"
+        );
+
+
+    if (cancelled) {
+
+        cancelledInfo
+            .classList
+            .remove("hidden");
+
+
+        /*
+         * This will display the reason if the API
+         * returns it. Otherwise it still clearly
+         * identifies the transaction as cancelled.
+         */
+        document
+            .getElementById(
+                "viewCancellationReason"
+            )
+            .textContent =
+            transaction.cancellationReason
+                ? "Reason: " +
+                  transaction.cancellationReason
+                : "This transaction no longer affects financial calculations.";
+
+    } else {
+
+        cancelledInfo
+            .classList
+            .add("hidden");
+    }
+
+
+    transactionViewModal.show();
 }
 
 /* ============================================================
