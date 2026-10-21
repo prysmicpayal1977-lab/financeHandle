@@ -482,6 +482,19 @@
 
                 </div>
 
+                <div class="text-end mt-2">
+
+                    <a
+                        href="#"
+                        class="small text-decoration-none"
+                        onclick="openForgotPasswordModal(); return false;">
+
+                        Forgot password?
+
+                    </a>
+
+                </div>
+
             </div>
 
 
@@ -1753,6 +1766,197 @@
 
 </div>
 
+
+<!-- =========================================================
+     FORGOT PASSWORD
+========================================================= -->
+
+<div
+    class="modal fade"
+    id="forgotPasswordModal"
+    tabindex="-1">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    Forgot Password
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <!-- STEP 1 - REQUEST CODE -->
+            <form id="forgotRequestForm">
+
+                <div class="modal-body">
+
+                    <p class="text-muted small">
+                        Enter your Partner ID or email. A 6-digit
+                        reset code will be sent to your registered email.
+                    </p>
+
+                    <label class="form-label">
+                        Partner ID or Email
+                    </label>
+
+                    <input
+                        id="forgotLoginId"
+                        type="text"
+                        class="form-control"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        Send Code
+
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <!-- STEP 2 - RESET WITH CODE -->
+            <form
+                id="forgotResetForm"
+                class="hidden">
+
+                <div class="modal-body">
+
+                    <div
+                        id="forgotInfo"
+                        class="alert alert-info small">
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Reset Code
+                        </label>
+
+                        <input
+                            id="resetCode"
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            class="form-control"
+                            autocomplete="one-time-code"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            New Password
+                        </label>
+
+                        <input
+                            id="resetNewPassword"
+                            type="password"
+                            minlength="8"
+                            class="form-control"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <small class="text-muted">
+                            Minimum 8 characters
+                        </small>
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="form-label">
+                            Confirm New Password
+                        </label>
+
+                        <input
+                            id="resetConfirmPassword"
+                            type="password"
+                            minlength="8"
+                            class="form-control"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-link me-auto"
+                        onclick="resendResetCode()">
+
+                        Resend code
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        Reset Password
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
 <!-- =========================================================
      SETTLEMENT MODAL
 ========================================================= -->
@@ -2390,6 +2594,8 @@ let currentSettlement = null;
 let transactionModal;
 let cancelModal;
 let changePasswordModal;
+let forgotPasswordModal;
+let forgotLoginId = "";
 
 let settlementModal;
 let cancelSettlementModal;
@@ -2425,6 +2631,13 @@ document.addEventListener(
             new bootstrap.Modal(
                 document.getElementById(
                     "changePasswordModal"
+                )
+            );
+
+        forgotPasswordModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    "forgotPasswordModal"
                 )
             );
 
@@ -4922,6 +5135,313 @@ document
                 clearSession();
 
                 showLogin();
+
+
+            } catch (error) {
+
+                showToast(
+                    "Error",
+                    error.message
+                );
+
+            } finally {
+
+                hideLoader();
+            }
+        }
+    );
+
+
+/* ============================================================
+   FORGOT PASSWORD
+============================================================ */
+
+function openForgotPasswordModal() {
+
+    document
+        .getElementById(
+            "forgotRequestForm"
+        )
+        .reset();
+
+    document
+        .getElementById(
+            "forgotResetForm"
+        )
+        .reset();
+
+    document
+        .getElementById(
+            "forgotRequestForm"
+        )
+        .classList.remove("hidden");
+
+    document
+        .getElementById(
+            "forgotResetForm"
+        )
+        .classList.add("hidden");
+
+
+    /*
+     * Prefill with whatever was typed
+     * on the login form.
+     */
+    document
+        .getElementById(
+            "forgotLoginId"
+        )
+        .value =
+            document
+                .getElementById("loginId")
+                .value
+                .trim();
+
+
+    forgotLoginId = "";
+
+    forgotPasswordModal.show();
+}
+
+
+async function sendResetCode(loginId) {
+
+    showLoader(
+        "Sending reset code..."
+    );
+
+
+    try {
+
+        const result =
+            await apiRequest(
+                "requestpasswordreset",
+                {
+                    loginId:
+                        loginId
+                }
+            );
+
+
+        if (!result.success) {
+
+            showToast(
+                "Password Reset",
+                result.message
+            );
+
+            return false;
+        }
+
+
+        document
+            .getElementById(
+                "forgotInfo"
+            )
+            .textContent =
+                result.message;
+
+        return true;
+
+
+    } catch (error) {
+
+        showToast(
+            "Error",
+            error.message
+        );
+
+        return false;
+
+    } finally {
+
+        hideLoader();
+    }
+}
+
+
+function resendResetCode() {
+
+    if (forgotLoginId) {
+
+        sendResetCode(
+            forgotLoginId
+        );
+    }
+}
+
+
+document
+    .getElementById(
+        "forgotRequestForm"
+    )
+    .addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const loginId =
+                document
+                    .getElementById(
+                        "forgotLoginId"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!loginId) {
+                return;
+            }
+
+
+            const sent =
+                await sendResetCode(
+                    loginId
+                );
+
+
+            if (!sent) {
+                return;
+            }
+
+
+            forgotLoginId =
+                loginId;
+
+            document
+                .getElementById(
+                    "forgotRequestForm"
+                )
+                .classList.add("hidden");
+
+            document
+                .getElementById(
+                    "forgotResetForm"
+                )
+                .classList.remove("hidden");
+        }
+    );
+
+
+document
+    .getElementById(
+        "forgotResetForm"
+    )
+    .addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const code =
+                document
+                    .getElementById(
+                        "resetCode"
+                    )
+                    .value
+                    .trim();
+
+
+            const newPassword =
+                document
+                    .getElementById(
+                        "resetNewPassword"
+                    )
+                    .value;
+
+
+            const confirmPassword =
+                document
+                    .getElementById(
+                        "resetConfirmPassword"
+                    )
+                    .value;
+
+
+            if (
+                newPassword !==
+                confirmPassword
+            ) {
+
+                showToast(
+                    "Password",
+                    "New password and confirmation do not match."
+                );
+
+                return;
+            }
+
+
+            if (
+                newPassword.length < 8
+            ) {
+
+                showToast(
+                    "Password",
+                    "Password must contain at least 8 characters."
+                );
+
+                return;
+            }
+
+
+            showLoader(
+                "Resetting password..."
+            );
+
+
+            try {
+
+                const result =
+                    await apiRequest(
+                        "resetpassword",
+                        {
+                            loginId:
+                                forgotLoginId,
+
+                            code:
+                                code,
+
+                            newPassword:
+                                newPassword
+                        }
+                    );
+
+
+                if (!result.success) {
+
+                    showToast(
+                        "Error",
+                        result.message
+                    );
+
+                    return;
+                }
+
+
+                forgotPasswordModal.hide();
+
+
+                document
+                    .getElementById(
+                        "loginId"
+                    )
+                    .value =
+                        forgotLoginId;
+
+                document
+                    .getElementById(
+                        "loginPassword"
+                    )
+                    .value = "";
+
+
+                alert(
+                    result.message
+                );
 
 
             } catch (error) {
